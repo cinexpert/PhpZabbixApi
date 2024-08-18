@@ -720,6 +720,39 @@ abstract class ZabbixApiAbstract
     }
 
     /**
+     * Requests the Zabbix API and returns the response of the method "valuemap.get".
+     *
+     * The $params Array can be used, to pass parameters to the Zabbix API.
+     * For more information about these parameters, check the Zabbix API
+     * documentation at https://www.zabbix.com/documentation/.
+     *
+     * The $arrayKeyProperty can be used to get an associative instead of an
+     * indexed array as response. A valid value for the $arrayKeyProperty is
+     * is any property of the returned JSON objects (e.g. "name", "host",
+     * "hostid", "graphid", "screenitemid").
+     *
+     * @param mixed $params Zabbix API parameters
+     * @param string|null $arrayKeyProperty Object property for key of array
+     *
+     * @throws Exception
+     *
+     * @return mixed
+     */
+
+    public function valuemapGet($params = [], $arrayKeyProperty = null)
+    {
+        // get params array for request
+        $params = $this->getRequestParamsArray($params);
+
+        // check if we've to authenticate
+        $auth = in_array('valuemap.get', self::$anonymousFunctions) ? FALSE : TRUE;
+
+        return $this->request('valuemap.get', $params, $arrayKeyProperty, $auth);
+    }
+
+
+
+    /**
      * @brief   Reqeusts the Zabbix API and returns the response of the API
      *          method action.exists.
      *
