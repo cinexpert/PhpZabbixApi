@@ -133,6 +133,8 @@ abstract class ZabbixApiAbstract
 
     private $sslContext = array();
 
+    protected $authToken = null;
+
     /**
      * @brief   Class constructor.
      *
