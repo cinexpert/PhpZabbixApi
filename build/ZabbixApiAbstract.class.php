@@ -135,6 +135,8 @@ abstract class ZabbixApiAbstract
 
     protected $authToken = null;
 
+    private $user;
+
     /**
      * @brief   Class constructor.
      *
