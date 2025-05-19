@@ -163,7 +163,7 @@ abstract class ZabbixApiAbstract
         if ($authToken)
             $this->setAuthToken($authToken);
         elseif($user && $password)
-            $this->userLogin(array('user' => $user, 'password' => $password));
+            $this->userLogin(array('username' => $user, 'password' => $password));
     }
 
     /**
@@ -298,7 +298,7 @@ abstract class ZabbixApiAbstract
     public function request($method, $params = null, $resultArrayKey = '', $auth = true)
     {
         if (!$this->authToken && $auth && $this->user && $this->password) {
-            $this->userLogin(array('user' => $this->user, 'password' => $this->password));
+            $this->userLogin(array('username' => $this->user, 'password' => $this->password));
         }
 
         // sanity check and conversion for params array
@@ -318,11 +318,15 @@ abstract class ZabbixApiAbstract
             'params' => $params,
             'id' => $this->id,
         );
+        $headers = [];
+        $headers[] = 'Content-type: application/json-rpc';
 
         // add auth token if required
         if ($auth) {
-            $this->request['auth'] = $this->authToken ?: null;
+            $headers[] = sprintf('Authorization: Bearer %s', $this->authToken ?? null);
         }
+
+        $headers[] = $this->extraHeaders;
 
         // encode request array
         $this->requestEncoded = json_encode($this->request);
@@ -336,7 +340,7 @@ abstract class ZabbixApiAbstract
         $context = array(
             'http' => array(
                 'method' => 'POST',
-                'header' => 'Content-type: application/json-rpc'."\r\n".$this->extraHeaders,
+                'header' => implode("\r\n", $headers),
                 'content' => $this->requestEncoded,
             ),
         );
@@ -519,10 +523,10 @@ abstract class ZabbixApiAbstract
         $this->authToken = '';
 
         // build filename for cached auth token
-        if($tokenCacheDir && array_key_exists('user', $params) && is_dir($tokenCacheDir))
+        if($tokenCacheDir && array_key_exists('username', $params) && is_dir($tokenCacheDir))
         {
             $uid            = function_exists('posix_getuid') ? posix_getuid() : -1;
-            $tokenCacheFile = $tokenCacheDir.'/.zabbixapi-token-'.md5($params['user'].'|'.$uid);
+            $tokenCacheFile = $tokenCacheDir.'/.zabbixapi-token-'.md5($params['username'].'|'.$uid);
         }
 
         // try to read cached auth token
